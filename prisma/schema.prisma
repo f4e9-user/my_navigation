@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Asset {
+  id            String        @id @default(cuid())
+  hostname      String        @unique
+  rootDomain    String
+  sources       String
+  dnsRecordType String?
+  dnsValue      String?
+  proxied       Boolean?
+  ttl           Int?
+  tunnelId      String?
+  tunnelName    String?
+  tunnelService String?
+  firstSeenAt   DateTime      @default(now())
+  lastSyncedAt  DateTime
+  removedAt     DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  profile       AssetProfile?
+
+  @@index([rootDomain])
+  @@index([removedAt])
+}
+
+model AssetProfile {
+  id          String   @id @default(cuid())
+  assetId     String   @unique
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  displayName String?
+  description String?
+  category    String   @default("其他")
+  icon        String?
+  sortOrder   Int      @default(0)
+  isVisible   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
